@@ -1,0 +1,30 @@
+cabal-version:       2.4
+
+name:                tachyons-to-tailwind
+version:             0.1.0.0
+synopsis:            Reads source files looking for tachyons classes and replaces them with equivalent tailwind classes.
+license:             NONE
+license-file:        LICENSE
+author:              Shane Kenney
+maintainer:          shane.kenney@lwb.org.au
+
+data-files:          tachyons.css,
+                     tachyons-test.css
+
+executable tachyons-to-tailwind
+  main-is:             Main.hs
+  other-modules:       Paths_tachyons_to_tailwind,
+                       Tachyons
+
+  build-depends:       base ^>=4.13.0.0,
+                       css-text,
+                       directory,
+                       text,
+                       regex-tdfa
+
+                
+  default-language:    Haskell2010
+
+  ghc-options:         -Wall
+
+  default-extensions:  OverloadedStrings
