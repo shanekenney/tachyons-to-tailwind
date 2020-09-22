@@ -1,9 +1,9 @@
 module Main where
 
-import Tachyons (parse, classes, NestedBlock)
 import Data.Function ((&))
 import Data.List (intercalate)
 import Data.Text as Text (Text, unpack)
+import Tachyons (NestedBlock, classes, parse)
 
 main :: IO ()
 main = do
@@ -20,9 +20,8 @@ processTachyons :: [NestedBlock] -> IO ()
 processTachyons = printClasses . classes
 
 printClasses :: [Text] -> IO ()
-printClasses classes' = 
+printClasses classes' =
   classes'
     & map unpack
     & intercalate "\n"
     & putStrLn
-

@@ -2,7 +2,8 @@ cabal-version:       2.4
 
 name:                tachyons-to-tailwind
 version:             0.1.0.0
-synopsis:            Reads source files looking for tachyons classes and replaces them with equivalent tailwind classes.
+synopsis:            A code mod tool
+description:         Reads source files looking for tachyons classes and replaces them with equivalent tailwind classes.
 license:             NONE
 license-file:        LICENSE
 author:              Shane Kenney
