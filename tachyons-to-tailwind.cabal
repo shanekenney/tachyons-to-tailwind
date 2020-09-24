@@ -21,11 +21,12 @@ executable tachyons-to-tailwind
                        css-text,
                        directory,
                        text,
-                       regex-tdfa
+                       regex-tdfa,
+                       optparse-applicative
 
                 
   default-language:    Haskell2010
 
-  ghc-options:         -Wall
+  ghc-options:         -Wall -haddock
 
   default-extensions:  OverloadedStrings
