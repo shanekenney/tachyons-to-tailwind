@@ -22,7 +22,12 @@ executable tachyons-to-tailwind
                        directory,
                        text,
                        regex-tdfa,
-                       optparse-applicative
+                       optparse-applicative,
+                       containers,
+                       cli,
+                       filepath,
+                       extra,
+                       colourista
 
                 
   default-language:    Haskell2010

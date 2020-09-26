@@ -1,16 +1,20 @@
-module Tachyons (classes, parse, selectors, NestedBlock) where
+module Tachyons (Css, classes, parse) where
 
+import Data.Set (Set)
+import qualified Data.Set as Set (fromList)
 import Data.Text as Text (Text, tail)
 import Data.Text.IO as TextIO (readFile)
 import Paths_tachyons_to_tailwind (getDataFileName)
 import Text.CSS.Parse (NestedBlock (..), parseNestedBlocks)
 import Text.Regex.TDFA
 
-parse :: String -> IO (Either String [NestedBlock])
-parse dataFile =
-  getDataFileName dataFile
-    >>= TextIO.readFile
-    >>= return . parseNestedBlocks
+newtype Css = Css [NestedBlock]
+
+parse :: String -> IO (Either String Css)
+parse dataFile = do
+  file <- getDataFileName dataFile
+  content <- TextIO.readFile file
+  pure $ Css <$> parseNestedBlocks content
 
 selectorsInBlock :: NestedBlock -> [Text]
 selectorsInBlock (NestedBlock _ css) = selectors css
@@ -19,13 +23,13 @@ selectorsInBlock (LeafBlock cssBlock) = [selector]
     selector = fst cssBlock
 
 selectors :: [NestedBlock] -> [Text]
-selectors css = foldr getSelectors [] css
+selectors = foldr getSelectors []
   where
     getSelectors block selectors' =
       selectorsInBlock block ++ selectors'
 
-classes :: [NestedBlock] -> [Text]
-classes css = selectors css >>= getClasses
+classes :: Css -> Set Text
+classes (Css css) = Set.fromList (selectors css >>= getClasses)
   where
     className = Text.tail
 
