@@ -9,9 +9,11 @@ license-file:        LICENSE
 author:              Shane Kenney
 maintainer:          shane.kenney@lwb.org.au
 
+data-dir:            data
 data-files:          tachyons.css
 
 executable tachyons-to-tailwind
+  hs-source-dirs:      src
   main-is:             Main.hs
   other-modules:       Paths_tachyons_to_tailwind,
                        Tachyons
