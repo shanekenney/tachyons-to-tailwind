@@ -87,5 +87,5 @@ printResults = traverse_ printFileResult
     formatResults results =
       results
         <&> Text.justifyLeft 20 ' '
-        & List.intercalate ["\n"] . LE.chunksOf 4
-        & fold
+          & List.intercalate ["\n"] . LE.chunksOf 4
+          & fold
