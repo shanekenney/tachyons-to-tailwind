@@ -12,7 +12,6 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
 import Options.Applicative
-import System.FilePath
 import Tachyons (Css, classes, parse)
 import Text.Regex.TDFA
 
@@ -42,7 +41,7 @@ main = do
 run :: Opts -> Css -> IO ()
 run (Opts files) tachyonsCss = do
   let tachyons = classes tachyonsCss
-  results <- mapM (readAndFindMatches tachyons) files
+  results <- traverse (readAndFindMatches tachyons) files
   printResults results
 
 wordsInFile :: Text -> [Text]
@@ -59,12 +58,11 @@ findMatches wanted allWords =
   where
     isWanted = flip Set.member wanted
 
-readAndFindMatches :: Set Text -> FilePath -> IO (Text, [Text])
+readAndFindMatches :: Set Text -> FilePath -> IO (FilePath, [Text])
 readAndFindMatches tachyons file = do
-  let fileName = Text.pack $ takeFileName file
   fileContent <- TextIO.readFile file
   let matches = findMatches tachyons $ wordsInFile fileContent
-  pure (fileName, matches)
+  pure (file, matches)
 
 -------------------------------------------------------------------------------
 -- Display
@@ -75,19 +73,17 @@ printParseError err = do
   print ("Failed parsing tachyons.css" :: String)
   print err
 
-printResults :: [(Text, [Text])] -> IO ()
-printResults = mapM_ printFileResult
+printResults :: [(FilePath, [Text])] -> IO ()
+printResults = traverse_ printFileResult
   where
-    printFileResult :: (Text, [Text]) -> IO ()
+    printFileResult :: (FilePath, [Text]) -> IO ()
     printFileResult (_, []) = pure ()
     printFileResult (fileName, results) = do
-      TextIO.putStrLn $ formatFileName fileName
+      putStrLn $ formatWith [magenta] fileName
       TextIO.putStrLn $ formatResults results
       putStrLn ""
 
-    formatFileName :: Text -> Text
-    formatFileName name = formatWith [magenta] name
-
+    formatResults :: [Text] -> Text
     formatResults results =
       results
         <&> Text.justifyLeft 20 ' '
