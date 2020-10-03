@@ -6,8 +6,8 @@ synopsis:            A code mod tool
 description:         Reads source files looking for tachyons classes and replaces them with equivalent tailwind classes.
 license:             MIT
 license-file:        LICENSE
-author:              Shane Kenney
-maintainer:          me@shanek.org.au
+author:              Shane Kenney <me@shanek.org>
+maintainer:          Shane Kenney <me@shanek.org>
 
 data-dir:            data
 data-files:          tachyons.css
