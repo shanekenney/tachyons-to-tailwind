@@ -11,9 +11,9 @@ import qualified Data.Set as Set (member)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
+import FindReplace (findStrings, matchText)
 import Options.Applicative
 import Tachyons (Css, classes, parse)
-import Text.Regex.TDFA
 
 -------------------------------------------------------------------------------
 -- Options Parsing
@@ -45,7 +45,7 @@ cmdParser =
 
     replaceParse :: Parser Cmd
     replaceParse =
-      Replace <$> fileArgs <*> (flag Normal DryRun (long "dry-run"))
+      Replace <$> fileArgs <*> flag Normal DryRun (long "dry-run")
 
 opts :: ParserInfo Cmd
 opts = info (cmdParser <**> helper) idm
@@ -79,11 +79,8 @@ run cmd tachyonsCss =
 
 wordsInFile :: Text -> [Text]
 wordsInFile fileContent =
-  getAllTextMatches (fileContent =~ literalStrRegex)
-    >>= Text.splitOn " " . chompQuotes
-  where
-    literalStrRegex = "\"[^\"]+\"" :: Text
-    chompQuotes = Text.init . Text.tail
+  let strings = matchText <$> findStrings fileContent
+   in strings >>= Text.splitOn " "
 
 findMatches :: Set Text -> [Text] -> [Text]
 findMatches wanted allWords =
@@ -96,6 +93,9 @@ readAndFindMatches tachyons file = do
   fileContent <- TextIO.readFile file
   let matches = findMatches tachyons $ wordsInFile fileContent
   pure (file, matches)
+
+testContent :: Text
+testContent = "div [ class \"flex fixed z-999 bg-light-yellow bottom-0 left-0\""
 
 -------------------------------------------------------------------------------
 -- Display
