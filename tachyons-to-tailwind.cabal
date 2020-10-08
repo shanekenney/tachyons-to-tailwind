@@ -16,7 +16,7 @@ executable tachyons-to-tailwind
   hs-source-dirs:      src
   main-is:             Main.hs
   other-modules:       Paths_tachyons_to_tailwind,
-                       FindReplace,
+                       SourceFile,
                        Tachyons
 
   build-depends:       base ^>=4.13.0.0,

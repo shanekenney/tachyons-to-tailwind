@@ -11,8 +11,8 @@ import qualified Data.Set as Set (member)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
-import FindReplace (findStrings, matchText)
 import Options.Applicative
+import SourceFile (readSourceFile, tachyonsInFile)
 import Tachyons (Css, classes, parse)
 
 -------------------------------------------------------------------------------
@@ -77,11 +77,6 @@ run cmd tachyonsCss =
         (List files) -> list tachyons files
         (Replace files mode) -> replace tachyons files mode
 
-wordsInFile :: Text -> [Text]
-wordsInFile fileContent =
-  let strings = matchText <$> findStrings fileContent
-   in strings >>= Text.splitOn " "
-
 findMatches :: Set Text -> [Text] -> [Text]
 findMatches wanted allWords =
   List.nub $ filter isWanted allWords
@@ -91,7 +86,8 @@ findMatches wanted allWords =
 readAndFindMatches :: Set Text -> FilePath -> IO (FilePath, [Text])
 readAndFindMatches tachyons file = do
   fileContent <- TextIO.readFile file
-  let matches = findMatches tachyons $ wordsInFile fileContent
+  let sourceFile = readSourceFile tachyons fileContent
+  let matches = List.nub $ tachyonsInFile sourceFile
   pure (file, matches)
 
 testContent :: Text
