@@ -7,12 +7,11 @@ import Data.Functor ((<&>))
 import qualified Data.List as List
 import qualified Data.List.Extra as LE
 import Data.Set (Set)
-import qualified Data.Set as Set (member)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
 import Options.Applicative
-import SourceFile (readSourceFile, tachyonsInFile)
+import SourceFile
 import Tachyons (Css, classes, parse)
 
 -------------------------------------------------------------------------------
@@ -60,16 +59,6 @@ main = do
   parsedCss <- parse "tachyons.css"
   either printParseError (run parsedOpts) parsedCss
 
-list :: Set Text -> [FilePath] -> IO ()
-list tachyons files = do
-  results <- traverse (readAndFindMatches tachyons) files
-  printResults results
-
-replace :: Set Text -> [FilePath] -> ReplaceMode -> IO ()
-replace _tachyons _files mode = do
-  putStrLn "Not implemented."
-  print mode
-
 run :: Cmd -> Css -> IO ()
 run cmd tachyonsCss =
   let tachyons = classes tachyonsCss
@@ -77,21 +66,43 @@ run cmd tachyonsCss =
         (List files) -> list tachyons files
         (Replace files mode) -> replace tachyons files mode
 
-findMatches :: Set Text -> [Text] -> [Text]
-findMatches wanted allWords =
-  List.nub $ filter isWanted allWords
+list :: Set Text -> [FilePath] -> IO ()
+list tachyons files = do
+  results <- traverse readAndFindMatches files
+  printListResults results
   where
-    isWanted = flip Set.member wanted
+    readAndFindMatches :: FilePath -> IO (FilePath, [Text])
+    readAndFindMatches file = do
+      fileContent <- TextIO.readFile file
+      let sourceFile = readSourceFile tachyons fileContent
+      let matches = List.nub $ tachyonsInFile sourceFile
+      pure (file, matches)
 
-readAndFindMatches :: Set Text -> FilePath -> IO (FilePath, [Text])
-readAndFindMatches tachyons file = do
-  fileContent <- TextIO.readFile file
-  let sourceFile = readSourceFile tachyons fileContent
-  let matches = List.nub $ tachyonsInFile sourceFile
-  pure (file, matches)
+dropThird :: (a, b, c) -> (a, b)
+dropThird (a, b, _) = (a, b)
 
-testContent :: Text
-testContent = "div [ class \"flex fixed z-999 bg-light-yellow bottom-0 left-0\""
+third :: (a, b, c) -> c
+third (_, _, c) = c
+
+isDryRun :: ReplaceMode -> Bool
+isDryRun DryRun = True
+isDryRun Normal = False
+
+replace :: Set Text -> [FilePath] -> ReplaceMode -> IO ()
+replace tachyons files mode = do
+  results <- traverse readAndReplaceMatches files
+  let replacements = dropThird <$> results
+  let noReplacements = concat $ third <$> results
+  printReplaceResults (isDryRun mode) replacements
+  printNoReplacements $ List.nub noReplacements
+  where
+    readAndReplaceMatches :: FilePath -> IO (FilePath, [(Text, Text)], [Text])
+    readAndReplaceMatches file = do
+      fileContent <- TextIO.readFile file
+      let sourceFile = readSourceFile tachyons fileContent
+      let replacements = replacementsInFile sourceFile
+      let noReplacements = noReplacementsInFile sourceFile
+      pure (file, replacements, noReplacements)
 
 -------------------------------------------------------------------------------
 -- Display
@@ -102,16 +113,56 @@ printParseError err = do
   putStrLn ("Failed parsing tachyons.css" :: String)
   putStrLn err
 
-printResults :: [(FilePath, [Text])] -> IO ()
-printResults = traverse_ printFileResult
+printListResults :: [(FilePath, [Text])] -> IO ()
+printListResults = traverse_ printListResult
   where
-    printFileResult :: (FilePath, [Text]) -> IO ()
-    printFileResult (_, []) = pure ()
-    printFileResult (fileName, results) = do
+    printListResult :: (FilePath, [Text]) -> IO ()
+    printListResult (_, []) = pure ()
+    printListResult (fileName, results) = do
       putStrLn $ formatWith [magenta] fileName
       TextIO.putStrLn $ formatResults results
       putStrLn ""
 
+    formatResults :: [Text] -> Text
+    formatResults results =
+      results
+        <&> Text.justifyLeft 20 ' '
+          & List.intercalate ["\n"] . LE.chunksOf 4
+          & fold
+
+printReplaceResults :: Bool -> [(FilePath, [(Text, Text)])] -> IO ()
+printReplaceResults dryRun = do
+  traverse_ printReplaceResult
+  where
+    printReplaceResult :: (FilePath, [(Text, Text)]) -> IO ()
+    printReplaceResult (fileName, []) = do
+      let dryRunIndicator =
+            if dryRun
+              then formatWith [bold, magenta] "[Dry run] "
+              else ""
+      putStrLn $ dryRunIndicator ++ formatWith [magenta] fileName
+      putStrLn "No replacements made"
+      putStrLn ""
+    printReplaceResult (fileName, results) = do
+      putStrLn $ formatWith [magenta] fileName
+      TextIO.putStrLn $ formatResults results
+      putStrLn ""
+
+    formatResults :: [(Text, Text)] -> Text
+    formatResults results =
+      let formatResult (from, to) = Text.concat [Text.justifyLeft 16 ' ' from, " -> ", to]
+       in results
+            <&> formatResult
+            <&> Text.justifyLeft 40 ' '
+              & List.intercalate ["\n"] . LE.chunksOf 2
+              & fold
+
+printNoReplacements :: [Text] -> IO ()
+printNoReplacements noReplacements = do
+  putStrLn $ formatWith [bold, blue] "Note: No replacement rules were found for the following classes:"
+  TextIO.putStrLn $ formatResults noReplacements
+  putStrLn ""
+  where
     formatResults :: [Text] -> Text
     formatResults results =
       results

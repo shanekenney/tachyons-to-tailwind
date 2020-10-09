@@ -1,4 +1,11 @@
-module SourceFile (SourceFile, readSourceFile, tachyonsInFile) where
+module SourceFile
+  ( SourceFile,
+    readSourceFile,
+    tachyonsInFile,
+    replacementsInFile,
+    noReplacementsInFile
+  )
+where
 
 import Data.Set (Set)
 import qualified Data.Set as Set (member)
@@ -56,10 +63,30 @@ wordsInFile sourceFile = concat $ stringWords <$> sourceFileStrings sourceFile
 
 tachyonsInFile :: SourceFile -> [Text]
 tachyonsInFile sourceFile =
-  foldr className [] $ wordsInFile sourceFile
+  foldr collectMatches [] $ wordsInFile sourceFile
   where
-    className word rs =
+    collectMatches word results =
       case word of
-        Other -> rs
-        Replacement fromClassName _ -> fromClassName : rs
-        NoReplacement className -> className : rs
+        Replacement fromClassName _ -> fromClassName : results
+        NoReplacement className -> className : results
+        Other -> results
+
+replacementsInFile :: SourceFile -> [(Text, Text)]
+replacementsInFile sourceFile =
+  foldr collectReplacements [] $ wordsInFile sourceFile
+  where
+    collectReplacements word results =
+      case word of
+        Replacement from to -> (from, to) : results
+        NoReplacement _ -> results
+        Other -> results
+
+noReplacementsInFile :: SourceFile -> [Text]
+noReplacementsInFile sourceFile =
+  foldr collectNoReplacements [] $ wordsInFile sourceFile
+  where
+    collectNoReplacements word results =
+      case word of
+        NoReplacement className -> className : results
+        Replacement _ _ -> results
+        Other -> results
