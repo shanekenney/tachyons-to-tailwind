@@ -76,11 +76,19 @@ fontWeight =
     Replace "fw9" "black"
   ]
 
+display :: [Rule]
+display =
+  [ Replace "dn" "hidden",
+    Replace "di" "inline",
+    Replace "db" "block",
+    Replace "dib" "inline-block",
+    Replace "dt" "table"
+  ]
+
 other :: [Rule]
 other =
   [ Replace "w-100" "w-full",
     Replace "f5" "text-base",
-    Replace "db" "block",
     Keep "flex",
     Keep "top-0",
     Keep "overflow-hidden",
@@ -95,6 +103,7 @@ rules =
         [ spacing,
           position,
           fontWeight,
+          display,
           other
         ]
 
