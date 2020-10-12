@@ -61,10 +61,24 @@ spacing =
         ("7", "64")
       ]
 
+fontWeight :: [Rule]
+fontWeight =
+  [ Replace "fw1" "hairline",
+    Replace "fw2" "thin",
+    Replace "fw3" "light",
+    Replace "fw4" "normal",
+    Keep "normal",
+    Replace "fw5" "medium",
+    Replace "fw6" "semibold",
+    Replace "fw7" "bold",
+    Replace "b" "bold",
+    Replace "fw8" "extrabold",
+    Replace "fw9" "black"
+  ]
+
 other :: [Rule]
 other =
-  [ Replace "fw6" "font-semibold",
-    Replace "w-100" "w-full",
+  [ Replace "w-100" "w-full",
     Replace "f5" "text-base",
     Replace "db" "block",
     Keep "flex",
@@ -80,6 +94,7 @@ rules =
       <$> mconcat
         [ spacing,
           position,
+          fontWeight,
           other
         ]
 
