@@ -7,6 +7,7 @@ import Data.Text (Text)
 data Rule
   = Replace Text Text
   | Keep Text
+  deriving (Show)
 
 toPair :: Rule -> (Text, Text)
 toPair (Replace from to) = (from, to)
@@ -14,16 +15,42 @@ toPair (Keep from) = (from, from)
 
 spacingRules :: [Rule]
 spacingRules =
-  [ Replace "pa3" "p-4",
-    Replace "pb3" "pb-4",
-    Replace "pt3" "pt-4",
-    Replace "pr3" "pr-4",
-    Replace "pl3" "pl-4",
-    Replace "pb0" "pb-0",
-    Replace "ph3" "px-4",
-    Replace "pv3" "py-4",
-    Replace "ph4" "px-8"
-  ]
+  [mkRule b m s | b <- base, m <- modifier, s <- scale]
+  where
+    mkRule :: Text -> (Text, Text) -> (Text, Text) -> Rule
+    mkRule b m s =
+      Replace
+        (b <> fst m <> fst s)
+        (b <> snd m <> "-" <> snd s)
+
+    base :: [Text]
+    base =
+      [ "p",
+        "m"
+      ]
+
+    modifier :: [(Text, Text)]
+    modifier =
+      [ ("a", ""),
+        ("h", "y"),
+        ("v", "x"),
+        ("t", "t"),
+        ("r", "r"),
+        ("b", "b"),
+        ("l", "l")
+      ]
+
+    scale :: [(Text, Text)]
+    scale =
+      [ ("0", "0"),
+        ("1", "1"),
+        ("2", "2"),
+        ("3", "4"),
+        ("4", "8"),
+        ("5", "16"),
+        ("6", "32"),
+        ("7", "64")
+      ]
 
 rules :: Map Text Text
 rules =

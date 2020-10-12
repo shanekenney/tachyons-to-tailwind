@@ -145,7 +145,7 @@ printReplaceResults dryRun =
           then formatWith [bold, magenta] "[Dry run] "
           else ""
       putStrLn $ formatWith [magenta] fileName
-      putStrLn "No replacements made"
+      putStrLn "No matching replacements"
       putStrLn ""
     printReplaceResult (fileName, results) = do
       putStr $
