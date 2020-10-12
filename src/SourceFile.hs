@@ -47,7 +47,7 @@ stringLiteralParser wordMatch =
 
 sourceChunkParser :: Parser SourceContent
 sourceChunkParser =
-  SourceChunk . Text.pack <$> many (anySingleBut '"')
+  SourceChunk . Text.pack <$> many (anySingleBut '\"')
 
 sourceFileParser :: (Text -> WordMatch) -> Parser SourceFile
 sourceFileParser wordMatch =

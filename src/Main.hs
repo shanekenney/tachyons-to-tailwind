@@ -166,8 +166,9 @@ printReplaceResults dryRun =
               & fold
 
 printNoReplacements :: [Text] -> IO ()
+printNoReplacements [] = pure ()
 printNoReplacements noReplacements = do
-  putStrLn $ formatWith [bold, blue] "Note: No replacement rules were found for the following classes:"
+  putStrLn $ formatWith [bold, blue] "No replacement rules were found for the following classes:"
   TextIO.putStrLn $ formatResults noReplacements
   putStrLn ""
   where

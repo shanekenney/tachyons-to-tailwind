@@ -13,8 +13,17 @@ toPair :: Rule -> (Text, Text)
 toPair (Replace from to) = (from, to)
 toPair (Keep from) = (from, from)
 
-spacingRules :: [Rule]
-spacingRules =
+position :: [Rule]
+position =
+  Keep
+    <$> [ "static",
+          "relative",
+          "absolute",
+          "fixed"
+        ]
+
+spacing :: [Rule]
+spacing =
   [mkRule b m s | b <- base, m <- modifier, s <- scale]
   where
     mkRule :: Text -> (Text, Text) -> (Text, Text) -> Rule
@@ -52,20 +61,27 @@ spacingRules =
         ("7", "64")
       ]
 
+other :: [Rule]
+other =
+  [ Replace "fw6" "font-semibold",
+    Replace "w-100" "w-full",
+    Replace "f5" "text-base",
+    Replace "db" "block",
+    Keep "flex",
+    Keep "top-0",
+    Keep "overflow-hidden",
+    Keep "justify-between"
+  ]
+
 rules :: Map Text Text
 rules =
   Map.fromList $
     toPair
-      <$> spacingRules
-        <> [ Replace "fw6" "font-semibold",
-             Replace "w-100" "w-full",
-             Replace "f5" "text-base",
-             Replace "db" "block",
-             Keep "flex",
-             Keep "top-0",
-             Keep "overflow-hidden",
-             Keep "justify-between"
-           ]
+      <$> mconcat
+        [ spacing,
+          position,
+          other
+        ]
 
 getReplacement :: Text -> Maybe Text
 getReplacement fromClass =
