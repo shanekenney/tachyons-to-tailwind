@@ -22,12 +22,10 @@ executable tachyons-to-tailwind
 
   build-depends:       base ^>=4.13.0.0,
                        css-text,
-                       directory,
                        text,
                        regex-tdfa,
                        optparse-applicative,
                        containers,
-                       cli,
                        extra,
                        colourista,
                        megaparsec
