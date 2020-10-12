@@ -1,62 +1,102 @@
 module SourceFile
   ( SourceFile,
     readSourceFile,
+    writeSourceFile,
     tachyonsInFile,
     replacementsInFile,
-    noReplacementsInFile
+    noReplacementsInFile,
   )
 where
 
-import Data.Set (Set)
-import qualified Data.Set as Set (member)
+import Data.Foldable (foldl')
+import Data.Maybe
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Text.Regex.TDFA
+import Data.Void (Void)
+import ReplacementRule (getReplacement)
+import Text.Megaparsec
+import Text.Megaparsec.Char
+import qualified Text.Megaparsec.Char.Lexer as L
 
-data SourceFile = SourceFile
-  { sourceFileText :: Text,
-    sourceFileStrings :: [StringLiteral]
-  }
+newtype SourceFile = SourceFile [SourceContent]
   deriving (Show)
 
-data StringLiteral = StringLiteral
-  { stringIndex :: Int,
-    stringLength :: Int,
-    stringWords :: [WordMatch]
-  }
+data SourceContent
+  = StringLiteral [WordMatch]
+  | SourceChunk Text
   deriving (Show)
 
 data WordMatch
-  = Other
+  = Other Text
   | Replacement Text Text
   | NoReplacement Text
   deriving (Show, Eq)
 
-readSourceFile :: Set Text -> Text -> SourceFile
-readSourceFile tachyons fileContent =
-  SourceFile
-    { sourceFileText = fileContent,
-      sourceFileStrings = stringLiterals
-    }
+type Parser = Parsec Void Text
+
+stringLiteralParser :: (Text -> WordMatch) -> Parser SourceContent
+stringLiteralParser wordMatch =
+  StringLiteral
+    . fmap wordMatch
+    . Text.splitOn " "
+    <$> doubleQuoteStr
   where
-    stringLiterals :: [StringLiteral]
-    stringLiterals =
-      let indexMatches = getAllMatches (fileContent =~ literalStrRegex) :: [(Int, Int)]
-          textMatches = getAllTextMatches (fileContent =~ literalStrRegex) :: [Text]
-       in zipWith mkLiteral indexMatches textMatches
-      where
-        literalStrRegex = "\"[^\"]+\"" :: Text
-        chompQuotes = Text.init . Text.tail
-        mkLiteral index text =
-          StringLiteral
-            { stringWords = wordMatch <$> Text.splitOn " " (chompQuotes text),
-              stringIndex = fst index + 1, -- Don't include first quote
-              stringLength = snd index - 2 -- Subtract surrounding quotes
-            }
+    doubleQuoteStr =
+      Text.pack
+        <$> (char '\"' *> manyTill L.charLiteral (char '\"'))
+
+sourceChunkParser :: Parser SourceContent
+sourceChunkParser =
+  SourceChunk . Text.pack <$> many (anySingleBut '"')
+
+sourceFileParser :: (Text -> WordMatch) -> Parser SourceFile
+sourceFileParser wordMatch =
+  SourceFile
+    <$> manyTill
+      (stringLiteralWords <|> sourceChunkParser)
+      eof
+  where
+    stringLiteralWords = stringLiteralParser wordMatch
+
+readSourceFile :: (Text -> Bool) -> Text -> SourceFile
+readSourceFile isMatch fileContent =
+  fromMaybe (SourceFile []) $
+    parseMaybe (sourceFileParser wordMatch) fileContent
+  where
     wordMatch :: Text -> WordMatch
-    wordMatch text
-      | Set.member text tachyons = NoReplacement text
-      | otherwise = Other
+    wordMatch text =
+      case getReplacement text of
+        Just replacement ->
+          Replacement text replacement
+        Nothing ->
+          if isMatch text
+            then NoReplacement text
+            else Other text
+
+writeSourceFile :: SourceFile -> Text
+writeSourceFile (SourceFile content) = foldl' toText Text.empty content
+  where
+    toText text (StringLiteral words') = text <> "\"" <> wordsToText words' <> "\""
+    toText text (SourceChunk textChunk) = text <> textChunk
+
+sourceFileStrings :: SourceFile -> [SourceContent]
+sourceFileStrings (SourceFile content) =
+  filter isStringLiteral content
+  where
+    isStringLiteral (StringLiteral _) = True
+    isStringLiteral _ = False
+
+stringWords :: SourceContent -> [WordMatch]
+stringWords (StringLiteral words') = words'
+stringWords _ = []
+
+wordsToText :: [WordMatch] -> Text
+wordsToText = Text.intercalate " " . fmap wordToText
+  where
+    wordToText :: WordMatch -> Text
+    wordToText (Replacement _ to) = to
+    wordToText (NoReplacement word) = word
+    wordToText (Other word) = word
 
 wordsInFile :: SourceFile -> [WordMatch]
 wordsInFile sourceFile = concat $ stringWords <$> sourceFileStrings sourceFile
@@ -69,7 +109,7 @@ tachyonsInFile sourceFile =
       case word of
         Replacement fromClassName _ -> fromClassName : results
         NoReplacement className -> className : results
-        Other -> results
+        Other _ -> results
 
 replacementsInFile :: SourceFile -> [(Text, Text)]
 replacementsInFile sourceFile =
@@ -79,7 +119,7 @@ replacementsInFile sourceFile =
       case word of
         Replacement from to -> (from, to) : results
         NoReplacement _ -> results
-        Other -> results
+        Other _ -> results
 
 noReplacementsInFile :: SourceFile -> [Text]
 noReplacementsInFile sourceFile =
@@ -89,4 +129,4 @@ noReplacementsInFile sourceFile =
       case word of
         NoReplacement className -> className : results
         Replacement _ _ -> results
-        Other -> results
+        Other _ -> results

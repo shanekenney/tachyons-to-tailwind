@@ -7,6 +7,7 @@ import Data.Functor ((<&>))
 import qualified Data.List as List
 import qualified Data.List.Extra as LE
 import Data.Set (Set)
+import qualified Data.Set as Set (member)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
@@ -74,7 +75,7 @@ list tachyons files = do
     readAndFindMatches :: FilePath -> IO (FilePath, [Text])
     readAndFindMatches file = do
       fileContent <- TextIO.readFile file
-      let sourceFile = readSourceFile tachyons fileContent
+      let sourceFile = readSourceFile (`Set.member` tachyons) fileContent
       let matches = List.nub $ tachyonsInFile sourceFile
       pure (file, matches)
 
@@ -99,9 +100,12 @@ replace tachyons files mode = do
     readAndReplaceMatches :: FilePath -> IO (FilePath, [(Text, Text)], [Text])
     readAndReplaceMatches file = do
       fileContent <- TextIO.readFile file
-      let sourceFile = readSourceFile tachyons fileContent
+      let sourceFile = readSourceFile (`Set.member` tachyons) fileContent
       let replacements = replacementsInFile sourceFile
       let noReplacements = noReplacementsInFile sourceFile
+      if not (isDryRun mode)
+        then TextIO.writeFile file $ writeSourceFile sourceFile
+        else pure ()
       pure (file, replacements, noReplacements)
 
 -------------------------------------------------------------------------------
@@ -131,19 +135,23 @@ printListResults = traverse_ printListResult
           & fold
 
 printReplaceResults :: Bool -> [(FilePath, [(Text, Text)])] -> IO ()
-printReplaceResults dryRun = do
+printReplaceResults dryRun =
   traverse_ printReplaceResult
   where
     printReplaceResult :: (FilePath, [(Text, Text)]) -> IO ()
     printReplaceResult (fileName, []) = do
-      let dryRunIndicator =
-            if dryRun
-              then formatWith [bold, magenta] "[Dry run] "
-              else ""
-      putStrLn $ dryRunIndicator ++ formatWith [magenta] fileName
+      putStr $
+        if dryRun
+          then formatWith [bold, magenta] "[Dry run] "
+          else ""
+      putStrLn $ formatWith [magenta] fileName
       putStrLn "No replacements made"
       putStrLn ""
     printReplaceResult (fileName, results) = do
+      putStr $
+        if dryRun
+          then formatWith [bold, magenta] "[Dry run] "
+          else ""
       putStrLn $ formatWith [magenta] fileName
       TextIO.putStrLn $ formatResults results
       putStrLn ""
