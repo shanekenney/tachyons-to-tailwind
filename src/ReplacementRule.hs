@@ -85,14 +85,34 @@ display =
     Replace "dt" "table"
   ]
 
+flex :: [Rule]
+flex =
+  [ Keep "flex",
+    Keep "inline-flex",
+    Keep "flex-auto",
+    Keep "flex-none",
+    Keep "items-start",
+    Keep "items-end",
+    Keep "items-center",
+    Keep "items-baseline",
+    Keep "items-stretch",
+    Keep "justify-start",
+    Keep "justify-end",
+    Keep "justify-center",
+    Keep "justify-between",
+    Keep "justify-around",
+    Keep "flex-row",
+    Keep "flex-row-reverse",
+    Replace "flex-column" "flex-col",
+    Replace "flex-column-reverse" "flex-col-reverse"
+  ]
+
 other :: [Rule]
 other =
   [ Replace "w-100" "w-full",
     Replace "f5" "text-base",
-    Keep "flex",
     Keep "top-0",
-    Keep "overflow-hidden",
-    Keep "justify-between"
+    Keep "overflow-hidden"
   ]
 
 rules :: Map Text Text
@@ -104,6 +124,7 @@ rules =
           position,
           fontWeight,
           display,
+          flex,
           other
         ]
 
