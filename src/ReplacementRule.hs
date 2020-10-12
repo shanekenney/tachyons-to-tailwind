@@ -107,6 +107,19 @@ flex =
     Replace "flex-column-reverse" "flex-col-reverse"
   ]
 
+borderRadius :: [Rule]
+borderRadius =
+  [ Replace "br0" "rounded-none",
+    Replace "br1" "rounded-sm",
+    Replace "br2" "rounded",
+    Replace "br3" "rounded-lg",
+    Replace "br4" "rounded-2xl",
+    Replace "br--bottom" "rounded-t-none",
+    Replace "br--top" "rounded-b-none",
+    Replace "br--right" "rounded-l-none",
+    Replace "br--left" "rounded-r-none"
+  ]
+
 other :: [Rule]
 other =
   [ Replace "w-100" "w-full",
@@ -125,6 +138,7 @@ rules =
           fontWeight,
           display,
           flex,
+          borderRadius,
           other
         ]
 
