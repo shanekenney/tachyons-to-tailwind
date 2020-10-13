@@ -148,6 +148,14 @@ width =
     Replace "w-60" "w-3/5"
   ]
 
+textAlign :: [Rule]
+textAlign =
+  [ Replace "tl" "text-left",
+    Replace "tr" "text-right",
+    Replace "tc" "text-center",
+    Replace "tj" "text-justify"
+  ]
+
 other :: [Rule]
 other =
   [ Replace "w-100" "w-full",
@@ -169,6 +177,7 @@ rules =
           fontSize,
           height,
           width,
+          textAlign,
           other
         ]
 
