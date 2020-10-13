@@ -19,7 +19,11 @@ position =
     <$> [ "static",
           "relative",
           "absolute",
-          "fixed"
+          "fixed",
+          "top-0",
+          "right-0",
+          "bottom-0",
+          "left-0"
         ]
 
 spacing :: [Rule]
@@ -117,7 +121,8 @@ borderRadius =
     Replace "br--bottom" "rounded-t-none",
     Replace "br--top" "rounded-b-none",
     Replace "br--right" "rounded-l-none",
-    Replace "br--left" "rounded-r-none"
+    Replace "br--left" "rounded-r-none",
+    Replace "br-pill" "rounded-full"
   ]
 
 fontSize :: [Rule]
@@ -131,11 +136,22 @@ fontSize =
     Replace "f7" "text-xs"
   ]
 
+height :: [Rule]
+height =
+  [ Replace "h-100" "h-full",
+    Replace "vh-100" "h-screen"
+  ]
+
+width :: [Rule]
+width =
+  [ Replace "w-40" "w-2/5",
+    Replace "w-60" "w-3/5"
+  ]
+
 other :: [Rule]
 other =
   [ Replace "w-100" "w-full",
     Replace "f5" "text-base",
-    Keep "top-0",
     Keep "overflow-hidden"
   ]
 
@@ -151,6 +167,8 @@ rules =
           flex,
           borderRadius,
           fontSize,
+          height,
+          width,
           other
         ]
 
