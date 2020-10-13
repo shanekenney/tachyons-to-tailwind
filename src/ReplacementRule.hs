@@ -120,6 +120,17 @@ borderRadius =
     Replace "br--left" "rounded-r-none"
   ]
 
+fontSize :: [Rule]
+fontSize =
+  [ Replace "f1" "text-5xl",
+    Replace "f2" "text-4xl",
+    Replace "f3" "text-2xl",
+    Replace "f4" "text-xl",
+    Replace "f5" "text-base",
+    Replace "f6" "text-sm",
+    Replace "f7" "text-xs"
+  ]
+
 other :: [Rule]
 other =
   [ Replace "w-100" "w-full",
@@ -139,6 +150,7 @@ rules =
           display,
           flex,
           borderRadius,
+          fontSize,
           other
         ]
 
