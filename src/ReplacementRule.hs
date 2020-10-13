@@ -111,6 +111,16 @@ flex =
     Replace "flex-column-reverse" "flex-col-reverse"
   ]
 
+border :: [Rule]
+border =
+  [ Replace "ba" "border",
+    Replace "bt" "border-t",
+    Replace "br" "border-r",
+    Replace "bb" "border-b",
+    Replace "bl" "border-l",
+    Replace "bn" "border-0"
+  ]
+
 borderRadius :: [Rule]
 borderRadius =
   [ Replace "br0" "rounded-none",
@@ -134,6 +144,13 @@ fontSize =
     Replace "f5" "text-base",
     Replace "f6" "text-sm",
     Replace "f7" "text-xs"
+  ]
+
+lineHeight :: [Rule]
+lineHeight =
+  [ Replace "lh-solid" "leading-4",
+    Replace "lh-title" "leading-5",
+    Replace "lh-copy" "leading-6"
   ]
 
 height :: [Rule]
@@ -173,8 +190,10 @@ rules =
           fontWeight,
           display,
           flex,
+          border,
           borderRadius,
           fontSize,
+          lineHeight,
           height,
           width,
           textAlign,
