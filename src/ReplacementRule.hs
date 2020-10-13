@@ -162,7 +162,8 @@ height =
 width :: [Rule]
 width =
   [ Replace "w-40" "w-2/5",
-    Replace "w-60" "w-3/5"
+    Replace "w-60" "w-3/5",
+    Replace "w-100" "w-full"
   ]
 
 textAlign :: [Rule]
@@ -173,11 +174,17 @@ textAlign =
     Replace "tj" "text-justify"
   ]
 
+colour :: [Rule]
+colour =
+  [ Keep "black",
+    Keep "white"
+  ]
+
 other :: [Rule]
 other =
-  [ Replace "w-100" "w-full",
-    Replace "f5" "text-base",
-    Keep "overflow-hidden"
+  [ Keep "overflow-hidden",
+    Keep "truncate",
+    Replace "ttu" "uppercase"
   ]
 
 rules :: Map Text Text
@@ -197,6 +204,7 @@ rules =
           height,
           width,
           textAlign,
+          colour,
           other
         ]
 
