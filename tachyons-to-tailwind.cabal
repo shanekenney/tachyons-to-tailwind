@@ -6,8 +6,8 @@ synopsis:            A code mod tool
 description:         Reads source files looking for tachyons classes and replaces them with equivalent tailwind classes.
 license:             MIT
 license-file:        LICENSE
-author:              Shane Kenney
-maintainer:          me@shanek.org.au
+author:              Shane Kenney <me@shanek.org>
+maintainer:          Shane Kenney <me@shanek.org>
 
 data-dir:            data
 data-files:          tachyons.css
@@ -16,18 +16,19 @@ executable tachyons-to-tailwind
   hs-source-dirs:      src
   main-is:             Main.hs
   other-modules:       Paths_tachyons_to_tailwind,
+                       ReplacementRule,
+                       SourceFile,
                        Tachyons
 
   build-depends:       base ^>=4.13.0.0,
                        css-text,
-                       directory,
                        text,
                        regex-tdfa,
                        optparse-applicative,
                        containers,
-                       cli,
                        extra,
-                       colourista
+                       colourista,
+                       megaparsec
 
                 
   default-language:    Haskell2010
@@ -35,3 +36,4 @@ executable tachyons-to-tailwind
   ghc-options:         -Wall -haddock
 
   default-extensions:  OverloadedStrings
+                       NamedFieldPuns
