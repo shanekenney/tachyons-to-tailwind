@@ -45,8 +45,8 @@ spacing =
     modifier :: [(Text, Text)]
     modifier =
       [ ("a", ""),
-        ("h", "y"),
-        ("v", "x"),
+        ("h", "x"),
+        ("v", "y"),
         ("t", "t"),
         ("r", "r"),
         ("b", "b"),
@@ -67,17 +67,17 @@ spacing =
 
 fontWeight :: [Rule]
 fontWeight =
-  [ Replace "fw1" "hairline",
-    Replace "fw2" "thin",
-    Replace "fw3" "light",
-    Replace "fw4" "normal",
-    Keep "normal",
-    Replace "fw5" "medium",
-    Replace "fw6" "semibold",
-    Replace "fw7" "bold",
-    Replace "b" "bold",
-    Replace "fw8" "extrabold",
-    Replace "fw9" "black"
+  [ Replace "fw1" "font-hairline",
+    Replace "fw2" "font-thin",
+    Replace "fw3" "font-light",
+    Replace "fw4" "font-normal",
+    Replace "normal" "font-normal",
+    Replace "fw5" "font-medium",
+    Replace "fw6" "font-semibold",
+    Replace "fw7" "font-bold",
+    Replace "b" "font-bold",
+    Replace "fw8" "font-extrabold",
+    Replace "fw9" "font-black"
   ]
 
 display :: [Rule]
