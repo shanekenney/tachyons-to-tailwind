@@ -176,8 +176,8 @@ textAlign =
 
 colour :: [Rule]
 colour =
-  [ Keep "black",
-    Keep "white"
+  [ Replace "black" "text-black",
+    Replace "white" "text-white"
   ]
 
 other :: [Rule]
